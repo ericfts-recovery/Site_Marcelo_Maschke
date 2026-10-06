@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Marcelo Maschke Hair Salon — site institucional
 
-## Getting Started
+Site do salão com foco em **conversão (WhatsApp + pré-agendamento)**, **SEO local** e **design editorial premium** (preto, cinza claro, branco e dourado fosco).
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router, Cache Components, Turbopack) + TypeScript estrito
+- Tailwind CSS v4 com design tokens em variáveis CSS (`src/app/globals.css`)
+- React Hook Form + Zod (o mesmo schema valida no navegador e no servidor)
+- Server Action + Resend para o formulário
+- Fontes auto-hospedadas via `next/font/local` (Cormorant Garamond + Jost, licença OFL)
+
+## Como rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # preencha as variáveis
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Scripts úteis: `npm run build`, `npm run lint`, `npm run typecheck`, `npm run format`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variável               | Obrigatória       | Uso                                                    |
+| ---------------------- | ----------------- | ------------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL` | Sim (produção)    | Domínio final: canonical, sitemap, Open Graph, JSON-LD |
+| `NEXT_PUBLIC_GA_ID`    | Não               | GA4. Carrega **apenas** após consentimento de cookies  |
+| `RESEND_API_KEY`       | Para o formulário | Chave do Resend (somente servidor)                     |
+| `BOOKING_TO_EMAIL`     | Para o formulário | Quem recebe os pedidos                                 |
+| `BOOKING_FROM_EMAIL`   | Para o formulário | Remetente com domínio verificado no Resend             |
 
-## Learn More
+Sem as variáveis do Resend o formulário continua funcionando no front, mas mostra uma mensagem amigável com o botão do WhatsApp em vez de enviar.
 
-To learn more about Next.js, take a look at the following resources:
+## Onde editar o conteúdo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| O quê                                                        | Arquivo                   |
+| ------------------------------------------------------------ | ------------------------- |
+| Nome, contato, endereço, horários, Instagram, números        | `src/content/site.ts`     |
+| Serviços (textos, FAQ, SEO, mensagem de WhatsApp de cada um) | `src/content/services.ts` |
+| Textos da home, depoimentos, galeria, FAQ geral              | `src/content/home.ts`     |
+| Cores, fontes, espaçamentos, animações                       | `src/app/globals.css`     |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fotos
 
-## Deploy on Vercel
+Enquanto não houver fotos, o site mostra molduras elegantes com a legenda do que deve entrar ali. Para trocar:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Coloque as imagens em `public/images/` (JPG/PNG grandes; o Next gera AVIF/WebP automaticamente).
+2. Preencha o campo `image` (ou `heroImage`, `portrait`, `bridalImage`) com `{ src, alt, width, height }`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Estrutura
+
+```
+src/
+  app/            rotas, layout, metadata, sitemap, robots, OG image, 404/erro
+    agendar/      página + Server Action do pré-agendamento
+    servicos/[slug]/  uma página por serviço (geradas no build)
+  components/
+    layout/       header, footer, barra mobile, cookies, analytics, mapa
+    sections/     seções da home e das páginas internas
+    ui/           botões, ícones, molduras, títulos, FAQ, JSON-LD
+    booking/      formulário
+  content/        todo o conteúdo do cliente (reaproveitável)
+  lib/            seo, schema (JSON-LD), analytics, consent, whatsapp, validação
+  services/       integrações (e-mail)
+  types/          tipos de conteúdo
+```
+
+## Eventos de analytics
+
+`whatsapp_click`, `phone_click`, `instagram_click`, `booking_submit`, `booking_error`, `map_open` — todos com o parâmetro `location` (e `service`, quando houver). Configure-os como conversões no GA4.
+
+## Checklist de lançamento (dados do cliente)
+
+- [ ] `src/content/site.ts`: WhatsApp, telefone, e-mail, endereço completo, CEP, horários (preencha também `schema` de cada horário para o Google), link do Google Meu Negócio, coordenadas
+- [ ] Cidade no lugar de `[CIDADE]` (hero e títulos de SEO dos serviços)
+- [ ] Bio do Marcelo (`src/content/home.ts > aboutContent`)
+- [ ] Números reais (anos, clientes, nota no Google) ou remover o bloco
+- [ ] Depoimentos reais, com autorização das clientes
+- [ ] Revisar com o Marcelo técnicas/métodos de mechas e mega hair e o protocolo de biossegurança das unhas
+- [ ] Fotos reais: retrato, salão, noiva e galeria
+- [ ] Logo oficial em SVG (substituir `src/components/ui/logo.tsx` e `src/app/icon.svg`)
+- [ ] Política de privacidade: razão social, CNPJ, encarregado, prazos (recomenda-se revisão jurídica)
+- [ ] Domínio + `NEXT_PUBLIC_SITE_URL`, Resend com domínio verificado, GA4
+- [ ] Cadastrar o site no Google Search Console e enviar o `sitemap.xml`
+
+## Deploy (Vercel)
+
+1. Suba o repositório no GitHub e importe na Vercel.
+2. Cadastre as variáveis de ambiente (Production e Preview).
+3. Aponte o domínio. HTTPS e HSTS ficam ativos automaticamente.
+
+> Rate limit do formulário é em memória (por instância). Se o volume crescer, troque `src/lib/rate-limit.ts` por Upstash Redis.
