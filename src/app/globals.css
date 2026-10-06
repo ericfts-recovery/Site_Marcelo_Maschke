@@ -1,26 +1,219 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Design tokens — Marcelo Maschke Hair Salon
+   Paleta: preto, cinza claro, branco e dourado fosco (sem brilho).
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #0e0e0e;
+  --graphite: #171717;
+  --charcoal: #262626;
+  --stone: #5a5a58;
+  --ash: #a8a8a5;
+  --mist: #e8e7e4;
+  --fog: #f4f3f1;
+  --paper: #ffffff;
+
+  /* Dourado fosco: --gold para fundos escuros e superfícies,
+     --gold-deep para textos sobre fundos claros (contraste AA). */
+  --gold: #b8a07a;
+  --gold-soft: #c9b693;
+  --gold-deep: #6f5d40;
+
+  --line-dark: rgb(255 255 255 / 0.12);
+  --line-light: rgb(14 14 14 / 0.12);
+
+  --header-h: 72px;
+  --mobile-bar-h: 68px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-charcoal: var(--charcoal);
+  --color-stone: var(--stone);
+  --color-ash: var(--ash);
+  --color-mist: var(--mist);
+  --color-fog: var(--fog);
+  --color-paper: var(--paper);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-deep: var(--gold-deep);
+  --color-line-dark: var(--line-dark);
+  --color-line-light: var(--line-light);
+
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-h) + 16px);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility container-page {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 1280px;
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) {
+    padding-inline: 2.5rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 3rem;
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* Arco: forma assinatura do site (moldura de fotos). */
+@utility arch {
+  border-radius: 999px 999px 0 0;
+}
+
+/* ==========================================================================
+   Movimento — sempre discreto e desligado com prefers-reduced-motion.
+   O "reveal" usa scroll-driven animations (CSS puro, zero JS). Navegadores
+   sem suporte simplesmente exibem o conteúdo.
+   ========================================================================== */
+@keyframes rise {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes draw-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes strand {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-rise {
+    animation: rise 0.9s var(--ease-luxe) both;
+  }
+  .animate-line {
+    transform-origin: left;
+    animation: draw-line 1.2s var(--ease-luxe) 0.2s both;
+  }
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+  }
+  .animate-strand path {
+    stroke-dasharray: 1;
+    animation: strand 3.2s var(--ease-luxe) both;
+  }
+  .animate-strand path:nth-child(2n) {
+    animation-delay: 0.25s;
+  }
+  .animate-strand path:nth-child(3n) {
+    animation-delay: 0.5s;
+  }
+
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: fade-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
